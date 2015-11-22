@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon
+  id="script.iTunesImport"
+  version="1.0.0"
+  name="iTunes Import"
+  provider-name="lithium">
+  <requires>
+    <import addon="xbmc.python" version="2.20.0"/>
+  </requires>
+
+  <extension point="xbmc.python.script" library="itunes_import.py">
+    <provides>executable</provides>
+  </extension>
+
+  <extension point="xbmc.addon.metadata">
+    <platform>all</platform>
+    <summary lang="en">Script to import Playlists, and Ratings from iTunes</summary>
+    <description lang="en">Script to import Playlists, and Ratings from iTunes</description>
+    <license>Apache</license>
+    <email>code@hlidskialf.com</email>
+    <source>http://github.com/lithium/script.iTunesImport</source>
+  </extension>
+</addon>
