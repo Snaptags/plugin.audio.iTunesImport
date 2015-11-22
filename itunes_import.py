@@ -1,10 +1,12 @@
 import xbmcaddon
 import xbmcgui
-
-__addon__ = xbmcaddon.Addon()
-__addonname__ = __addon__.getAddonInfo('name')
-__addonid__ = __addon__.getAddonInfo('id')
-__addonversion__ = __addon__.getAddonInfo('version')
+import xbmcplugin
 
 
-xbmcgui.Dialog().ok(__addonname__, "Hello, iTunes Import v{0}!".format(__addonversion__))
+__handle__ = int(sys.argv[1])
+
+url = ''
+li = xbmcgui.ListItem('Library XML:')
+xbmcplugin.addDirectoryItem(handle=__handle__, url=url, listitem=li)
+
+xbmcplugin.endOfDirectory(handle=__handle__)
