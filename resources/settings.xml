@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="32001">
+        <setting label="Choose iTunes Music Library.xml" type="file" id="library_xml_path" />
+        <setting type="sep"/>
+        <setting label="Debug" type="bool" id="debug" default="false"/>
+    </category>
+</settings>
