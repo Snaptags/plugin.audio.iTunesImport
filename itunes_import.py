@@ -2,6 +2,7 @@ import xbmcaddon
 import xbmcgui
 import xbmcplugin
 import xbmc
+import xbmcvfs
 import urllib
 import urlparse
 import plistlib
@@ -37,9 +38,26 @@ def build_url(query):
 
 def parse_library_xml():
   progress = xbmcgui.DialogProgress()
-  progress.create(__addonname__, 'Parsing library plist')
+  progress.create(__addonname__, 'Downloading Plist')
   progress.update(25)
-  plist = plistlib.readPlist(library_xml_path)
+
+  f = xbmcvfs.File(library_xml_path, 'r')
+  buffer = StringIO.StringIO()
+  chunk_size = 4096
+  bytes_read = 0
+  file_size = f.size()
+  while bytes_read < file_size:
+    chunk = f.read(chunk_size)
+    if not chunk:
+      break;
+    buffer.write(chunk)
+    bytes_read += len(chunk)
+    progress.update(int(bytes_read/float(file_size)*90))
+
+  buffer.seek(0,0)
+  progress.update(90, "Parsing Plist")
+
+  plist = plistlib.readPlist(buffer)
   progress.close()
   return plist
 
