@@ -12,6 +12,7 @@ import json
 import random
 import os
 import sys
+import codecs
 
 # add ./resources/lib to sys.path 
 lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources', 'lib')
@@ -117,22 +118,22 @@ elif screen == 'import-playlist':
   playlist = itunes.playlists.get(playlist_id, None)
   if playlist:
     new_path = os.path.join(music_playlists_path, "{name}.pls".format(name=playlist['Name']))
-    with open(new_path, 'w') as new_playlist:
+    with codecs.open(new_path, 'w', encoding='utf8') as new_playlist:
 
       progress = xbmcgui.DialogProgress()
       progress.create(__addonname__, 'Creating Playlist')
       progress.update(1)
       track_count = float(len(playlist['Tracks']))
 
-      new_playlist.write("[playlist]\n")
+      new_playlist.write(u"[playlist]\n")
       i = 1
       for track in playlist['Tracks']:
         song = find_song(title=track['Name'], artist=track.get('Artist',''), album=track.get('Album',''))
         if song is not None:
-          new_playlist.write("\nFile{i}={path}\nTitle{i}={title}\n\n".format(i=i, path=song['file'], title=song['title']))
+          new_playlist.write(u"\nFile{i}={path}\nTitle{i}={title}\n\n".format(i=i, path=song['file'], title=song['title']))
           i += 1
         progress.update(int(i/track_count*100))
-      new_playlist.write("NumberOfEntries={i}\nVersion=2\n".format(i=i))
+      new_playlist.write(u"NumberOfEntries={i}\nVersion=2\n".format(i=i))
       progress.close()
 
 elif screen == 'import-ratings':
