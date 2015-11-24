@@ -11,6 +11,13 @@ import sys
 import json
 import random
 import os
+import sys
+
+# add ./resources/lib to sys.path 
+lib_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources', 'lib')
+sys.path.append(lib_path)
+
+from koditunes import ITunesParser
 
 __base__ = sys.argv[0]
 __handle__ = int(sys.argv[1])
@@ -35,31 +42,6 @@ print "base:{base} handle:{handle} args:{args} screen:{screen}".format(base=__ba
 
 def build_url(query):
     return "{base}?{query}".format(base=__base__, query=urllib.urlencode(query))
-
-def parse_library_xml():
-  progress = xbmcgui.DialogProgress()
-  progress.create(__addonname__, 'Downloading Plist')
-  progress.update(1)
-
-  f = xbmcvfs.File(library_xml_path, 'r')
-  buffer = StringIO.StringIO()
-  chunk_size = 4096
-  bytes_read = 0
-  file_size = f.size()
-  while bytes_read < file_size:
-    chunk = f.read(chunk_size)
-    if not chunk:
-      break;
-    buffer.write(chunk)
-    bytes_read += len(chunk)
-    progress.update(int(bytes_read/float(file_size)*90))
-
-  buffer.seek(0,0)
-  progress.update(90, "Parsing Plist")
-
-  plist = plistlib.readPlist(buffer)
-  progress.close()
-  return plist
 
 
 def json_rpc(method, request_id=None, **kwargs):
@@ -115,34 +97,35 @@ if screen == 'top':
   ratings_url = build_url({'screen': 'import-ratings'})
   ratings_item = xbmcgui.ListItem('Import Ratings', iconImage='DefaultFile.png')
   xbmcplugin.addDirectoryItem(handle=__handle__, url=ratings_url, listitem=ratings_item, isFolder=False)
+
+  # End
   xbmcplugin.endOfDirectory(handle=__handle__, succeeded=True)
 
 elif screen == 'playlists':
-  library = parse_library_xml()
-  for playlist in library.get('Playlists', []):
-    if not playlist.get('Distinguished Kind', None) and not playlist.get('Master', False): # skip internal 
+
+  itunes = ITunesParser(library_xml_path)
+  for playlist in itunes.playlists.values():
       url = build_url({'screen': 'import-playlist', 'playlistId': playlist['Playlist ID']})
       li = xbmcgui.ListItem(playlist['Name'])
       xbmcplugin.addDirectoryItem(handle=__handle__, url=url, listitem=li)
   xbmcplugin.endOfDirectory(handle=__handle__, succeeded=True)
 
 elif screen == 'import-playlist':
-  playlistId = int(__args__.get('playlistId')[0])
-  library = parse_library_xml()
-  playlist = next(p for p in library['Playlists'] if p['Playlist ID'] == playlistId)
-  new_path = os.path.join(music_playlists_path, "{name}.pls".format(name=playlist['Name']))
-  with open(new_path, 'w') as new_playlist:
-    new_playlist.write("[playlist]\n")
-    i = 1
+  playlist_id = __args__.get('playlistId')[0]
 
-    for item in playlist['Playlist Items']:
-      track = library['Tracks'][str(item['Track ID'])]
-      song = find_song(title=track['Name'], artist=track.get('Artist',''), album=track.get('Album',''))
-      if song is not None:
-        new_playlist.write("\nFile{i}={path}\nTitle{i}={title}\n\n".format(i=i, path=song['file'], title=song['title']))
-        i += 1
-
-    new_playlist.write("NumberOfEntries={i}\nVersion=2\n".format(i=i))
+  itunes = ITunesParser(library_xml_path)
+  playlist = itunes.playlists.get(playlist_id, None)
+  if playlist:
+    new_path = os.path.join(music_playlists_path, "{name}.pls".format(name=playlist['Name']))
+    with open(new_path, 'w') as new_playlist:
+      new_playlist.write("[playlist]\n")
+      i = 1
+      for track in playlist['Tracks']:
+        song = find_song(title=track['Name'], artist=track.get('Artist',''), album=track.get('Album',''))
+        if song is not None:
+          new_playlist.write("\nFile{i}={path}\nTitle{i}={title}\n\n".format(i=i, path=song['file'], title=song['title']))
+          i += 1
+      new_playlist.write("NumberOfEntries={i}\nVersion=2\n".format(i=i))
 
 elif screen == 'import-ratings':
   library = parse_library_xml()

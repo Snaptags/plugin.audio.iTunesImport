@@ -12,6 +12,8 @@
     <provides>executable</provides>
   </extension>
 
+  <extension point="xbmc.python.module" library="resources/lib"/>
+
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
     <summary lang="en">Import Playlists and Ratings from iTunes</summary>
