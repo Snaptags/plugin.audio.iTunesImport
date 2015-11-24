@@ -118,6 +118,12 @@ elif screen == 'import-playlist':
   if playlist:
     new_path = os.path.join(music_playlists_path, "{name}.pls".format(name=playlist['Name']))
     with open(new_path, 'w') as new_playlist:
+
+      progress = xbmcgui.DialogProgress()
+      progress.create(__addonname__, 'Creating Playlist')
+      progress.update(1)
+      track_count = float(len(playlist['Tracks']))
+
       new_playlist.write("[playlist]\n")
       i = 1
       for track in playlist['Tracks']:
@@ -125,12 +131,16 @@ elif screen == 'import-playlist':
         if song is not None:
           new_playlist.write("\nFile{i}={path}\nTitle{i}={title}\n\n".format(i=i, path=song['file'], title=song['title']))
           i += 1
+        progress.update(int(i/track_count*100))
       new_playlist.write("NumberOfEntries={i}\nVersion=2\n".format(i=i))
+      progress.close()
 
 elif screen == 'import-ratings':
-  library = parse_library_xml()
+  itunes = ITunesParser(library_xml_path)
+  library = itunes.plist
+
   progress = xbmcgui.DialogProgress()
-  progress.create(__addonname__, 'Importing Ratings')
+  progress.create(__addonname__, 'Updating Ratings')
   progress.update(1)
   num_tracks = float(len(library['Tracks']))
   i = 0

@@ -75,8 +75,7 @@ class ITunesParser(object):
       print("xml file not downloaded, downloading")
       self.download_file_to_cache()
 
-    print("Parsing plist...")
-    self.progressDialog.update(self.DOWNLOAD_PROGRESS)
+    self.progressDialog.update(self.DOWNLOAD_PROGRESS, "Parsing: iTunes Music Library.xml")
     cache_file = xbmcvfs.File(self.cached_library_xml_path, 'r')
     self._plist = plistlib.readPlist(cache_file)
     cache_file.close()
