@@ -9,7 +9,7 @@
   </requires>
 
   <extension point="xbmc.python.pluginsource" library="itunes_import.py">
-    <provides>executable</provides>
+    <provides>audio executable</provides>
   </extension>
 
   <extension point="xbmc.python.module" library="resources/lib"/>

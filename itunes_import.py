@@ -5,13 +5,10 @@ import xbmc
 import xbmcvfs
 import urllib
 import urlparse
-import plistlib
-import StringIO
 import sys
 import json
 import random
 import os
-import sys
 import codecs
 
 # add ./resources/lib to sys.path 
@@ -87,7 +84,6 @@ def find_song(title='', artist='', album=''):
 
 
 
-
 if screen == 'top':
   # Import Playlist
   playlists_url = build_url({'screen': 'playlists'})
@@ -150,7 +146,7 @@ elif screen == 'import-ratings':
       break
     progress.update(int(i/num_tracks*100))
     kind = track.get('Kind', '')
-    rating = track.get('Rating', 0)
+    rating = int(track.get('Rating', 0) / 100.0 * 5)
     if kind in ('MPEG audio file', 'Purchased AAC audio file', 'AAC audio file'):
       song = find_song(title=track['Name'], artist=track.get('Artist',''), album=track.get('Album',''))
       if song is not None and song.get('rating',0) != rating:
