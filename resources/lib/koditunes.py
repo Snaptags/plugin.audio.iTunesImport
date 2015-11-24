@@ -38,7 +38,7 @@ class ITunesParser(object):
   @property  
   def playlists(self):
     if not self._playlists:
-      self.parse_library_xml()
+      self.parse_library_xml(abort_unless_needed=True)
       if not self._playlists:
         self.load_playlist_index()
       self.finish_progress()
@@ -90,7 +90,7 @@ class ITunesParser(object):
     cache_file.close()
     return True
 
-  def parse_library_xml(self):
+  def parse_library_xml(self, abort_unless_needed=False):
     self.start_progress()
 
     last_time = None
@@ -115,7 +115,7 @@ class ITunesParser(object):
       json_file = xbmcvfs.File(self.cached_library_path, 'w')
       json.dump(self._plist, json_file, cls=PlistEncoder)
       json_file.close()
-    else:
+    elif not abort_unless_needed:
       self.progressDialog.update(60, "Loading cached iTunes Music Library.xml")
       json_file = xbmcvfs.File(self.cached_library_path, 'r')
       self._plist = json.load(json_file)
