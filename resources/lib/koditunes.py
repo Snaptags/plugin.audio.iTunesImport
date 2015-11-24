@@ -20,6 +20,7 @@ class ITunesParser(object):
     self.library_xml_uri = library_xml_uri
     self.addonname = addonname
     self.cached_library_xml_path = "special://temp/itunes_import-cache-music_library.xml"
+    self.cached_library_path = "special://temp/itunes_import-cache-library.json"
     self.cached_playlists_path = "special://temp/itunes_import-cache-playlists.json"
     self._playlists = None
     self._plist = None
@@ -75,10 +76,22 @@ class ITunesParser(object):
       print("xml file not downloaded, downloading")
       self.download_file_to_cache()
 
-    self.progressDialog.update(self.DOWNLOAD_PROGRESS, "Parsing: iTunes Music Library.xml")
-    cache_file = xbmcvfs.File(self.cached_library_xml_path, 'r')
-    self._plist = plistlib.readPlist(cache_file)
-    cache_file.close()
+    # TODO: check date in file to see if we need to update index
+
+    if not xbmcvfs.exists(self.cached_library_path):
+      self.progressDialog.update(self.DOWNLOAD_PROGRESS, "Parsing: iTunes Music Library.xml")
+      cache_file = xbmcvfs.File(self.cached_library_xml_path, 'r')
+      self._plist = plistlib.readPlist(cache_file)
+      cache_file.close()
+
+      json_file = xbmcvfs.File(self.cached_library_path, 'w')
+      json.dump(self._plist, json_file, cls=PlistEncoder)
+      json_file.close()
+    else:
+      self.progressDialog.update(self.DOWNLOAD_PROGRESS, "Loading cached iTunes Music Library.xml")
+      json_file = xbmcvfs.File(self.cached_library_path, 'r')
+      self._plist = json.load(json_file)
+      json_file.close()
     self.finish_progress()
 
   def build_playlist_index(self, plist):
